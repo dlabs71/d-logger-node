@@ -8,4 +8,4 @@
 
 Это первый релиз библиотеки D-logger-node. \
 Описание смотрите в [README](https://github.com/dlabs71/d-logger-node#readme) \
-NPM: [@dlabs71/d-logger](https://www.npmjs.com/package/@dlabs71/d-logger-node)
+NPM: [@dlabs71/d-logger-node](https://www.npmjs.com/package/@dlabs71/d-logger-node)
