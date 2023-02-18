@@ -1,4 +1,3 @@
-import moment from 'moment';
 import { LogAppender, createTemplate, templateFns } from '@dlabs71/d-logger';
 import fs from 'fs';
 import { join } from 'path';
@@ -48,7 +47,8 @@ export default class FileAppender extends LogAppender {
         const mergedConfig = LogAppender.mergeConfigs(defaultConfig(), config);
         super(mergedConfig);
 
-        this.config.path = join(config.directory, `${config.filePrefix}.${moment().format('YYYY-MM-DD')}.log`);
+        const currentDate = new Date().toISOString().split('T')[0];
+        this.config.path = join(config.directory, `${config.filePrefix}.${currentDate}.log`);
         this.initCurrentLogFile().finally(() => {
         });
     }
@@ -90,8 +90,8 @@ export default class FileAppender extends LogAppender {
                     return;
                 }
                 files = files.sort((item1, item2) => {
-                    const date1 = moment(item1.split('.')[1]);
-                    const date2 = moment(item2.split('.')[1]);
+                    const date1 = new Date(item1.split('.')[1]);
+                    const date2 = new Date(item2.split('.')[1]);
                     return date1 - date2;
                 });
                 for (let i = 0; i <= files.length - this.config.numberOfFiles; i += 1) {

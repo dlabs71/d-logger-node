@@ -1,7 +1,6 @@
 import {
     ConsoleAppender,
     createTemplate,
-    DLoggerPlugin,
     LOG_LEVEL,
     LogAppender,
     LogMessageInfo,
@@ -9,9 +8,11 @@ import {
 } from '@dlabs71/d-logger';
 import $log, { DLoggerNode } from './d-logger-node.js';
 import FileAppender from './appender/file-appender.js';
+import DLoggerNodePlugin from './d-logger-node-plugin.js';
 
 export {
-    DLoggerPlugin,
+    DLoggerNodePlugin,
+    DLoggerNodePlugin as DLoggerPlugin,
     templateFns,
     createTemplate,
     LogMessageInfo,
