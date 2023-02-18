@@ -1,6 +1,9 @@
-# D-logger
+# D-logger-node
 
-Библиотека для ведения журнала логирования JS/Vue приложений.
+Библиотека для ведения журнала логирования JS/Vue приложений. 
+Является расширением библиотеки [**@dlabs71/d-logger**](https://github.com/dlabs71/d-logger#readme).
+Предоставляет возможность логирования в файл по средствам предоставляемого `FileAppender` и методов управления данными 
+файлами в расширенном классе `DLogger`.
 
 [![NPM Version][npm-image]][npm-url]
 [![License][license-image]][license-url]
@@ -18,12 +21,13 @@ npm i @dlabs71/d-logger-node
 
 ## Подключение к Vue.js приложению
 
-Для использования d-logger-node во Vue приложении, импортируйте **`DLoggerPlugin`** плагин и подключите его.
+Для использования d-logger-node во Vue приложении, импортируйте `DLoggerPlugin` или `DLoggerNodePlugin` плагин и подключите его.
+Все параметры плагина соответствуют плагину `DLoggerPlugin` из библиотеки [@dlabs71/d-logger](https://github.com/dlabs71/d-logger#readme).
 
 **`main.js`**
 
 ```js
-import DLoggerPlugin from '@dlabs71/d-logger-node';
+import { DLoggerPlugin } from '@dlabs71/d-logger-node';
 
 Vue.use(DLoggerPlugin);
 // or
@@ -40,11 +44,12 @@ Vue.use(DLoggerPlugin, {
 | **Параметр** | **Тип**   | **Значение по умолчанию** | **Описание**
 | :------------| :---------| :-------------------------| :-------------------------------------
 | level        | string    | debug                     | Устанавливает уровень логирования | 
-| template     | function  | null                      | Функция определяющая шаблон строки логирования ([шаблоны](#3.1-Шаблоны-события-логирования)) | 
-| appenders    | array     | []                        | Список апендеров, реализующих класс **`LogAppender`**. По умолчанию сразу доступен **`ConsoleAppender`** ([аппендеры](#2.-Логгер))|
+| template     | function  | null                      | Функция определяющая шаблон строки логирования ([шаблоны](https://github.com/dlabs71/d-logger#section31)) | 
+| appenders    | array     | []                        | Список апендеров, реализующих класс **`LogAppender`**. По умолчанию сразу доступен **`ConsoleAppender`** ([аппендеры](https://github.com/dlabs71/d-logger#section2))|
 | stepInStack  | number    | 6                         | Индекс в стеке вызовов ошибки для определения файла и позиции вызова метода логирования. Если библиотека показывает не верный файл вызова метода логирования, то необходимо поменять данный параметр.
+| dateL10n     | string    | en                        | Локализация даты в логах (en, ru, ...). Для всех аппендеров по умолчанию. |
 
-Далее вы можете использовать её через **`this.$log`** как в примере ниже:
+Далее вы можете использовать её через `this.$log` как в примере ниже:
 
 **`example.vue`**
 
@@ -67,9 +72,9 @@ export default {
 
 ## Использование логгера без плагина Vue.js
 
-Для использования логгера без плагина Vue.js достаточно импортировать **`$log`** из **`d-logger-node`**. Вы получаете,
-настроенный по умолчанию, экземпляр класса DLogger. Он будет использовать **`ConsoleAppender`** в качестве единственного
-и основного аппендера логирования ([Логгер](#2.-Логгер)).
+Для использования логгера без плагина Vue.js достаточно импортировать `$log` из `@dlabs71/d-logger-node`. Вы получаете,
+настроенный по умолчанию, экземпляр класса `DLoggerNode`. Он будет использовать **`ConsoleAppender`** в качестве единственного
+и основного аппендера логирования ([Логгер](https://github.com/dlabs71/d-logger#section2)).
 
 ```js
 import {$log} from '@dlabs71/d-logger-node';
@@ -94,92 +99,35 @@ function exampleFunc(param1, param2) {
 }
 ```
 
+Более подробную документацию читайте в разделе [Документация](#Документация) текущего проекта 
+и в разделе [Документация проекта @dlabs71/d-logger](https://github.com/dlabs71/d-logger#%D0%B4%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D0%B0%D1%86%D0%B8%D1%8F)
+
 # Документация
 
-## 1. Уровни логирования
+## Оглавление
 
-| **Уровень логирования** | **Приоритет** | **Цвет**     |
-| :-----------------------| :-------------| :------------|
-| emerg                   | 0             | red          |
-| alert                   | 1             | orange       |
-| crit                    | 2             | red          |
-| error                   | 3             | red          |
-| warn                    | 4             | yellow       |
-| warning                 | 4             | yellow       |
-| notice                  | 5             | blue         |
-| info                    | 6             | green        |
-| debug                   | 7             | rainbow      |
+* [1. Расширенный логгер - DLoggerNode](#section1)
+    * [1.1 Методы конфигурации и управления аппендерами](#section11)
+        * [1.1.1 Метод addFileAppender](#section111)
+        * [1.1.2 Метод getFileAppenders](#section112)
+        * [1.1.3 Метод existFileAppender](#section113)
+        * [1.1.4 Метод deleteAllFileLogs](#section114)
 
-> Чем больше значение приоритета, тем больше уровней логирования будут отображаться.
-> - **0** - будут отображаться только логи с уровнем **emerg**.
-> - **7** - будут отображаться все уровни логирования
->
-> **warn** и **warning** - это два одинаковых уровня логирования "предупреждение". Создано для удобства использования
+## <h2 id="section1">1. Расширенный логгер - DLoggerNode</h2>
 
-## 2. Логгер
+Логгер представляет собой экземпляр класса `DLoggerNode`, который наследует класс `DLogger` из библиотеки [@dlabs71/d-logger](https://github.com/dlabs71/d-logger#section2). 
+Для управления журналом логирования существуют специальные классы, наследующие класс **`LogAppender`** (далее аппендеры). 
+Данная библиотека предоставляет аппендер, позволяющий логировать в файлы.
 
-Логгер представляет собой экземпляр класса **`DLogger`**. Для управления журналом логирования существуют специальные
-классы, наследующие класс **`LogAppender`** (далее аппендеры). Из коробки доступно 2 реализации:
-
-* **`ConsoleAppender`** - аппендер делегирующий управление журналов логирования реализации **`console`**
 * **`FileAppender`** - аппендер использующий файлы для записи событий логирования
 
-### 2.1 Методы логирования
+Наряду со стандартными методами `DLogger`, про которые можно прочитать [здесь](https://github.com/dlabs71/d-logger#section2). 
+`DLoggerNode` предоставляет ряд дополнительных методов для работы с `FileAppender`. 
 
-Логгер предоставляет методы соответствующие каждому из уровней логирования. Параметрами является массив значений любого
-типа.
 
-**`example.js`**
+### <h3 id="section21">1.1 Методы конфигурации и управления аппендерами</h3>
 
-```js
-import {$log} from '@dlabs71/d-logger-node';
-
-function exampleFunc(param1, param2) {
-    $log.info("Start exampleFunc with parameters: param1 = ", param1, ", param2 = ", param2);
-}
-```
-
-Если параметром метода логирования будет являться функция, то при вызове метода она выполниться, а результат будет
-конвертирован в строку. Когда параметр является объектом или массивом то значение будет преобразовано в строку при
-помощи **`JSON.stringify`**.
-
-### 2.2 Методы конфигурации и управления аппендерами
-
-#### 2.2.1 Метод configure
-
-Логгер предоставляет метод конфигурации **`configure`**. Данный метод принимает объект с параметрами конфигурации,
-описанные в таблице ниже.
-
-| **Параметр** | **Тип**   | **Значение по умолчанию** | **Описание**
-| :------------| :---------| :-------------------------| :-------------------------------------
-| level        | string    | debug                     | устанавливает уровень логирования
-| template     | function  | null                      | Функция определяющая шаблон строки логирования сразу для всех аппендеров ([шаблоны](#3.1-Шаблоны-события-логирования)).
-| appenders    | array     | []                        | Список аппендеров реализующих класс **`LogAppender`**. По умолчанию сразу устанавливается **`ConsoleAppender`**
-| stepInStack  | number    | 6                         | Индекс в стеке вызовов ошибки для определения файла и позиции вызова метода логирования. Если библиотека показывает не верный файл вызова метода логирования, то необходимо поменять данный параметр.
-
-Пример использования:
-
-```js
-import {$log} from '@dlabs71/d-logger-node';
-
-$log.configure({
-    level: "error"
-});
-```
-
-#### 2.2.2 Метод clearAppenders
-
-Метод предназначен для очищения списка аппендеров.
-
-Пример использования:
-
-```js
-import {$log} from '@dlabs71/d-logger-node';
-
-$log.clearAppenders();
-```
-
-#### 2.2.3 Метод addFileAppender
+#### <h4 id="section211">1.1.1 Метод addFileAppender</h4>
 
 Метод для добавления **`FileAppender`**. Параметры функции описаны в таблице ниже
 
@@ -189,7 +137,7 @@ $log.clearAppenders();
 | isRotatingFiles | boolean  | false                       | Активация механизма ротации файлов (удаление старых файлов)
 | filePrefix      | string   | null                        | Префикс для файлов логирования
 | level           | string   | null                        | Устанавливает уровень логирования аппендера
-| template        | function | null                        | Функция определяющая шаблон строки логирования аппендера ([шаблоны](#3.1-Шаблоны-события-логирования)).
+| template        | function | null                        | Функция определяющая шаблон строки логирования аппендера ([шаблоны](https://github.com/dlabs71/d-logger#section31)).
 | stepInStack     | number   | config.stepInStack          | Индекс в стеке вызовов ошибки для определения файла и позиции вызова метода логирования. Если библиотека показывает не верный файл вызова метода логирования, то необходимо поменять данный параметр.
 
 Пример использования:
@@ -200,7 +148,7 @@ import {$log} from '@dlabs71/d-logger-node';
 $log.addFileAppender('/var/log/app', true);
 ```
 
-#### 2.2.4 Метод getFileAppenders
+#### <h4 id="section212">1.1.2 Метод getFileAppenders</h4>
 
 Метод для получения списка всех **`FileAppender-ов`**.
 
@@ -212,7 +160,7 @@ let fileAppenders = $log.getFileAppenders();
 // fileAppenders = [FileAppender] 
 ```
 
-#### 2.2.5 Метод existFileAppender
+#### <h4 id="section213">1.1.3 Метод existFileAppender</h4>
 
 Метод для проверки существования **`FileAppender-ов`** в списке аппендеров
 
@@ -224,7 +172,7 @@ let exist = $log.existFileAppender();
 // exist = true
 ```
 
-#### 2.2.6 Метод deleteAllFileLogs
+#### <h4 id="section214">1.1.4 Метод deleteAllFileLogs</h4>
 
 Метод для удаления всех лог файлов
 
@@ -235,182 +183,7 @@ $log.addFileAppender('/var/log/app', true);
 $log.deleteAllFileLogs();
 ```
 
-#### 2.2.7 Метод addConsoleAppender
-
-Метод для добавления **`ConsoleAppender`**. Параметры функции описаны в таблице ниже
-
-| **Параметр** | **Тип**  | **Значение по умолчанию**   | **Описание**
-| :------------| :--------| :---------------------------| :-------------------------------------
-| level        | string   | null                        | Устанавливает уровень логирования аппендера
-| colorize     | boolean  | true                        | Использовать цвет логирования
-| template     | function | null                        | Функция определяющая шаблон строки логирования аппендера ([шаблоны](#3.1-Шаблоны-события-логирования)).
-| stepInStack  | number   | config.stepInStack          | Индекс в стеке вызовов ошибки для определения файла и позиции вызова метода логирования. Если библиотека показывает не верный файл вызова метода логирования, то необходимо поменять данный параметр.
-
-Пример использования:
-
-```js
-import {$log} from '@dlabs71/d-logger-node';
-
-$log.addConsoleAppender("debug", true);
-```
-
-#### 2.2.8 Метод addCustomAppender
-
-Метод для добавления собственной реализации аппендера. Он должен наследовать **`LogAppender`** класс.
-
-Пример использования:
-
-```js
-import {$log, LogAppender} from '@dlabs71/d-logger-node';
-
-class CustomAppender extends LogAppender {
-
-    constructor() {
-        super({});
-    }
-
-    log(strings, level = null, stepInStack = null) {
-        const message = this.creatingMessage(strings, level, stepInStack);
-        // реализация данного метода
-        return message
-    }
-}
-
-$log.addCustomAppender(new CustomAppender());
-```
-
-### 2.3 Вспомогательные методы логгера
-
-#### 2.3.1 Метод logProcessEnvs
-
-Метод для печати в журнал логов всех переменных окружения (**`process.env`**)
-
-Пример использования:
-
-```js
-import {$log} from '@dlabs71/d-logger-node';
-
-$log.logProcessEnvs();
-
-//  Process envs:
-//  VUE_APP_NODE_ENV=development;
-//  VUE_APP_LOG_ENABLED=true;
-//  VUE_APP_LOG_LEVEL=debug;
-//  VUE_APP_LOG_FILE=true;
-//  VUE_APP_LOG_FILE_PREFIX=app;
-//  VUE_APP_LOG_FILE_COUNT=5;
-//  VUE_APP_STORE_SECRET=345;
-//  NODE_ENV=development;
-//  BASE_URL=/;
-//  IS_ELECTRON=true;
-```
-
-#### 2.3.2 Метод dprsValue
-
-Метод для обезличивания строки
-
-Пример использования:
-
-```js
-import {$log} from '@dlabs71/d-logger-node';
-
-$log.dprsValue("qwerty$4", "password");
-// return "password:8"
-
-$log.dprsValue(null, "password");
-// return "password:null"
-
-$log.dprsValue(undefined, "password");
-// return "password:undefined"
-```
-
-#### 2.3.3 Метод dprsObj
-
-Метод для обезличивания полей в объекте
-
-Пример использования:
-
-```js
-import {$log} from '@dlabs71/d-logger-node';
-
-$log.dprsValue({
-    login: "daivanov",
-    password: "qwerty$4",
-    secretKey: "123"
-});
-// return {
-//      login: "daivanov",
-//      password: "password:8",
-//      secretKey: "secretKey:3"
-// }
-```
-
-#### 2.3.4 Метод len
-
-Метод для получения длины строки. Если параметр null или undefined, то возвращает соответствующее значение
-
-Пример использования:
-
-```js
-import {$log} from '@dlabs71/d-logger-node';
-
-$log.len("qwerty$4");
-// return 8
-
-$log.len(null);
-// return null
-
-$log.len(undefined);
-// return undefined
-```
-
-## 3. Вспомогательные функции
-
-### 3.1 Шаблоны события логирования
-
-При помощи метода **`createTemplate`** и доступных функций шаблонизации **`templateFns`** можно создать любой шаблон
-отображения события логирования. Метод **`createTemplate`** принимает на вход массив функций шаблонизации и возвращает
-функцию создания строки журнала логирования, принимающую на вход экземпляр
-класса **`LogMessageInfo`** (**`LogMessageInfo`** - класс описывающий данные для записи в журнал логирования). Функция
-шаблонизации представляет собой функцию принимающую на вход также экземпляр класса **`LogMessageInfo`** и возвращает
-строку. Если в списке заготовленных функций шаблонизации **`templateFns`** нет нужной вам, то вы всегда можете создать
-собственную фукции по аналогии с функциями использующимися в **`templateFns`**.
-
-Пример использования:
-
-```js
-import {$log, templateFns, createTemplate} from '@dlabs71/d-logger-node';
-
-let template = createTemplate(
-        // выводим уровень логирования
-        templateFns.level(),
-        // далее выводим символ разделителя "-"
-        templateFns.text(' - '),
-        // выводим время и дату события
-        templateFns.date('DD.MM.YYYY HH:mm:ss'),
-        // далее выводим символ разделителя "-"
-        templateFns.text(' - '),
-        // выводим файл и позицию вызова функции логирования
-        templateFns.location(true),
-        // переход на новую строку
-        templateFns.newLine(),
-        // выводим пользовательское сообщение собятия логирования
-        templateFns.message(),
-        // переход на новую строку
-        templateFns.newLine(),
-);
-
-// Вывод в журнале логов будет следующим, при использовании данного шаблона
-// 
-// ERROR - 02.11.2022 09:52:53 - /app/src/main.js:141:54
-// user logging message
-// 
-
-$log.configure({
-    level: "debug",
-    template: template
-});
-```
+Больше информации можно найти в разделе [Документация проекта @dlabs71/d-logger](https://github.com/dlabs71/d-logger#%D0%B4%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D0%B0%D1%86%D0%B8%D1%8F)
 
 [npm-image]: https://img.shields.io/npm/v/@dlabs71/d-logger-node
 
