@@ -1,6 +1,6 @@
 # D-logger-node
 
-Библиотека для ведения журнала логирования JS/Vue приложений. 
+Библиотека для ведения журнала логирования JS/Vue2/Vue3 приложений. 
 Является расширением библиотеки [**@dlabs71/d-logger**](https://github.com/dlabs71/d-logger#readme).
 Предоставляет возможность логирования в файл по средствам предоставляемого `FileAppender` и методов управления данными 
 файлами в расширенном классе `DLogger`.
@@ -49,7 +49,7 @@ Vue.use(DLoggerPlugin, {
 | stepInStack  | number    | 6                         | Индекс в стеке вызовов ошибки для определения файла и позиции вызова метода логирования. Если библиотека показывает не верный файл вызова метода логирования, то необходимо поменять данный параметр.
 | dateL10n     | string    | en                        | Локализация даты в логах (en, ru, ...). Для всех аппендеров по умолчанию. |
 
-Далее вы можете использовать её через `this.$log` как в примере ниже:
+Далее вы можете использовать её через `this.dlog` как в примере ниже:
 
 **`example.vue`**
 
@@ -61,26 +61,44 @@ export default {
     name: 'example',
     methods: {
         process() {
-            this.$log.debug("Starting method process");
+            this.dlog.debug("Starting method process");
             // code method
-            this.$log.debug("Ending method process");
+            this.dlog.debug("Ending method process");
         }
     }
 }
 </script>
 ```
 
+**`example.vue (For Vue3 composition API)`**
+
+```vue
+
+<template></template>
+<script setup>
+    import {useDLog} from '@dlabs71/d-logger';
+
+    const log = useDLog();
+
+    const process = () => {
+        log.debug("Starting method process");
+        // code method
+        log.debug("Ending method process");
+    }
+</script>
+```
+
 ## Использование логгера без плагина Vue.js
 
-Для использования логгера без плагина Vue.js достаточно импортировать `$log` из `@dlabs71/d-logger-node`. Вы получаете,
+Для использования логгера без плагина Vue.js достаточно импортировать `dlog` из `@dlabs71/d-logger-node`. Вы получаете,
 настроенный по умолчанию, экземпляр класса `DLoggerNode`. Он будет использовать `ConsoleAppender` в качестве единственного
 и основного аппендера логирования ([Логгер](https://github.com/dlabs71/d-logger#section2)).
 
 ```js
-import {$log} from '@dlabs71/d-logger-node';
+import {dlog} from '@dlabs71/d-logger-node';
 
 function exampleFunc(param1, param2) {
-    $log.info("Start exampleFunc with parameters: param1 = ", param1, ", param2 = ", param2);
+    dlog.info("Start exampleFunc with parameters: param1 = ", param1, ", param2 = ", param2);
 }
 ```
 
@@ -88,14 +106,14 @@ function exampleFunc(param1, param2) {
 документации проекта `@dlabs71/d-logger` [Метод configure](https://github.com/dlabs71/d-logger#section221).
 
 ```js
-import {$log} from '@dlabs71/d-logger-node';
+import {dlog} from '@dlabs71/d-logger-node';
 
-$log.configure({
+dlog.configure({
     level: "error"
 });
 
 function exampleFunc(param1, param2) {
-    $log.info("Start exampleFunc with parameters: param1 = ", param1, ", param2 = ", param2);
+    dlog.info("Start exampleFunc with parameters: param1 = ", param1, ", param2 = ", param2);
 }
 ```
 
@@ -143,9 +161,9 @@ function exampleFunc(param1, param2) {
 Пример использования:
 
 ```js
-import {$log} from '@dlabs71/d-logger-node';
+import {dlog} from '@dlabs71/d-logger-node';
 
-$log.addFileAppender('/var/log/app', true);
+dlog.addFileAppender('/var/log/app', true);
 ```
 
 #### <h4 id="section212">1.1.2 Метод getFileAppenders</h4>
@@ -153,10 +171,10 @@ $log.addFileAppender('/var/log/app', true);
 Метод для получения списка всех `FileAppender-ов`.
 
 ```js
-import {$log} from '@dlabs71/d-logger-node';
+import {dlog} from '@dlabs71/d-logger-node';
 
-$log.addFileAppender('/var/log/app', true);
-let fileAppenders = $log.getFileAppenders();
+dlog.addFileAppender('/var/log/app', true);
+let fileAppenders = dlog.getFileAppenders();
 // fileAppenders = [FileAppender] 
 ```
 
@@ -165,10 +183,10 @@ let fileAppenders = $log.getFileAppenders();
 Метод для проверки существования `FileAppender-ов` в списке аппендеров
 
 ```js
-import {$log} from '@dlabs71/d-logger-node';
+import {dlog} from '@dlabs71/d-logger-node';
 
-$log.addFileAppender('/var/log/app', true);
-let exist = $log.existFileAppender();
+dlog.addFileAppender('/var/log/app', true);
+let exist = dlog.existFileAppender();
 // exist = true
 ```
 
@@ -177,10 +195,10 @@ let exist = $log.existFileAppender();
 Метод для удаления всех лог файлов
 
 ```js
-import {$log} from '@dlabs71/d-logger-node';
+import {dlog} from '@dlabs71/d-logger-node';
 
-$log.addFileAppender('/var/log/app', true);
-$log.deleteAllFileLogs();
+dlog.addFileAppender('/var/log/app', true);
+dlog.deleteAllFileLogs();
 ```
 
 Больше информации можно найти в разделе [Документация проекта @dlabs71/d-logger](https://github.com/dlabs71/d-logger#%D0%B4%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D0%B0%D1%86%D0%B8%D1%8F)

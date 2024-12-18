@@ -77,6 +77,6 @@ export class DLoggerNode extends DLogger {
     }
 }
 
-const $log = new DLoggerNode();
+const dlog = new DLoggerNode();
 
-export default $log;
+export default dlog;
