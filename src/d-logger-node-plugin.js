@@ -1,4 +1,4 @@
-import $log from './d-logger-node.js';
+import dlog from './d-logger-node.js';
 
 export default {
 
@@ -19,8 +19,8 @@ export default {
      */
     install(Vue, opt) {
         if (!!opt && !!opt.logConfig) {
-            $log.configure(opt.logConfig);
+            dlog.configure(opt.logConfig);
         }
-        Vue.prototype.$log = $log;
+        Vue.prototype.dlog = dlog;
     },
 };

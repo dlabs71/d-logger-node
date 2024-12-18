@@ -1,7 +1,7 @@
 {
     "name": "@dlabs71/d-logger-node",
     "private": false,
-    "version": "1.0.0",
+    "version": "1.1.0",
     "author": {
         "name": "Danila Ivanov",
         "email": "danila.a.ivanov@d-labs.ru"
@@ -14,7 +14,7 @@
         "lint": "npx eslint --fix ./src"
     },
     "dependencies": {
-        "@dlabs71/d-logger": "file:/home/daivanov/PROJECTS/WEBSTORM/GIT/GITHUB/d-logger"
+        "@dlabs71/d-logger": "^2.1.0"
     },
     "peerDependencies": {
     },

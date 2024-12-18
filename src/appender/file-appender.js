@@ -1,6 +1,13 @@
-import { LogAppender, createTemplate, templateFns } from '@dlabs71/d-logger';
-import fs from 'fs';
-import { join } from 'path';
+import {createTemplate, LogAppender, templateFns} from '@dlabs71/d-logger';
+
+let fs, join;
+try {
+    fs = require('fs');
+    join = require('path').join;
+} catch (e) {
+    console.warn("Modules node:fs and node:path wasn't loaded");
+}
+
 
 /**
  * Default configuration for FileAppender {@see FileAppender}
@@ -59,7 +66,7 @@ export default class FileAppender extends LogAppender {
      */
     initCurrentLogFile() {
         return new Promise((resolve) => {
-            this.__fileStream = fs.createWriteStream(this.config.path, { flags: 'a' });
+            this.__fileStream = fs.createWriteStream(this.config.path, {flags: 'a'});
             if (this.config.isRotatingFiles) {
                 this.rotateLogFiles().finally(() => {
                     resolve();
